@@ -4,6 +4,7 @@ import time
 import random
 import os
 import json
+from config import SCRAPPING_DIR, SCRAPPING_DATA, SCRAPPING_CTRL, SCRAPPING_OUTPUT
 
 def scrape_wikipedia_article(title: str) -> str:
     """
@@ -83,17 +84,14 @@ def check_article_exists(output_file: str, article_title: str) -> bool:
 
 def main():
     # Exemple d'utilisation
-    directory = "D:/Scrapping"
-    articles = load_titles(f"{directory}/mgwiki-latest-all-titles-in-ns0")
+    articles = load_titles(f"{SCRAPPING_DATA}/mgwiki-latest-all-titles-in-ns0")
     # articles = ["","Madagasikara", "Fiteny_malagasy", "Andry_Rajoelina"]  # Exemples d'articles
     
-    output_directory = f"{directory}/out-put"
-    ctrl_directory = f"{directory}/ctrl"
-    output_file = f"{output_directory}/articles_wiki.txt"
-    progress_file = f"{ctrl_directory}/scraping_progress.json"
-    
     # Créer le dossier de sortie s'il n'existe pas
-    os.makedirs(output_directory, exist_ok=True)
+    os.makedirs(SCRAPPING_OUTPUT, exist_ok=True)
+    
+    output_file = f"{SCRAPPING_OUTPUT}/articles_wiki.txt"
+    progress_file = f"{SCRAPPING_CTRL}/scraping_progress.json"
     
     # Charger la progression existante
     progress = load_progress(progress_file)

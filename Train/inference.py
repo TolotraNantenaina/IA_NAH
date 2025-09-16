@@ -1,7 +1,10 @@
 import torch
 import argparse
 import os
+import sys
 from model import BigramLanguageModel
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from config import TRAIN_OUTPUT
 
 def load_model(checkpoint_path, device='cpu'):
     """
@@ -156,7 +159,7 @@ def interactive_mode(model, decode, device='cpu'):
 
 def main():
     parser = argparse.ArgumentParser(description='Test et génération avec le modèle malagasy')
-    parser.add_argument('--model', type=str, default='out-put/modele_malagasy.pth',
+    parser.add_argument('--model', type=str, default=os.path.join(TRAIN_OUTPUT, "modele_malagasy.pth"),
                        help='Chemin vers le fichier de modèle (.pth)')
     parser.add_argument('--device', type=str, default='auto',
                        choices=['auto', 'cpu', 'cuda'],
@@ -215,6 +218,7 @@ def main():
         return 1
     
     return 0
+
 
 if __name__ == "__main__":
     exit(main())

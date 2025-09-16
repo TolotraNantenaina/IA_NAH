@@ -1,7 +1,10 @@
 import torch
 import os
+import sys
 import pandas as pd
 from model import BigramLanguageModel
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from config import TRAIN_DIR, TRAIN_OUTPUT, TRAIN_DATA, SCRAPPING_DIR, SCRAPPING_OUTPUT
 
 # ======================
 #   HYPERPARAMÈTRES
@@ -280,11 +283,11 @@ def main():
     print("="*60)
     
     # Configuration des chemins
-    directory = "D:/Train"
-    output_directory = f"{directory}/out-put"
-    data_directory = f"{directory}/data"
-    data_scrapping_directory = "D:/Scrapping"
-    scrapping_out_directory = f"{data_scrapping_directory}/out-put"
+    directory = TRAIN_DIR
+    output_directory = TRAIN_OUTPUT
+    data_directory = TRAIN_DATA
+    data_scrapping_directory = SCRAPPING_DIR
+    scrapping_out_directory = SCRAPPING_OUTPUT
     
     # Configuration des données
     use_csv = False
@@ -331,7 +334,15 @@ def main():
     generate_sample_text(model, decode, hyperparams['device'])
     
     # Sauvegarder le modèle
-    model_path = f"{output_directory}/modele_malagasy.pth"
+    #model_path = f"{output_directory}/modele_malagasy.pth"
+    
+    # Récupérer le chemin de sauvegarde depuis la variable d'environnement si elle existe
+    model_path_env = os.environ.get('MODEL_OUTPUT_PATH')
+    if model_path_env:
+        model_path = model_path_env
+    else:
+        model_path = f"{output_directory}/modele_malagasy.pth"
+
     save_model(model, stoi, itos, hyperparams, model_path)
     
     print("\n🎉 Processus d'entraînement terminé avec succès!")

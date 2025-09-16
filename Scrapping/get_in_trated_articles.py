@@ -2,6 +2,7 @@ import os
 import json
 # Trouver les articles composés uniquement de 5 chiffres avant la virgule
 import re
+from config import SCRAPPING_DIR
 
 mois_mg = [
     "Janoary", "Febroary", "Martsa", "Aprily", "Mey", "Jona",
@@ -15,8 +16,7 @@ def load_titles(file_path: str) -> list:
 
 def main():
     # Exemple d'utilisation
-    directory = "D:/Scrapping"
-    articles = load_titles(f"{directory}/mgwiki-latest-all-titles-in-ns0")
+    articles = load_titles(f"{SCRAPPING_DIR}/mgwiki-latest-all-titles-in-ns0")
 
     articles_not_trated = []
     # Nombre entier strictement compris entre 1 et 99999
@@ -30,7 +30,7 @@ def main():
             articles_not_trated.append(article)
 
     # Écrire les articles non traités dans un fichier
-    output_file = os.path.join(directory, "mgwiki-latest-all-titles-in-ns0-non-traites.txt")
+    output_file = os.path.join(SCRAPPING_DIR, "mgwiki-latest-all-titles-in-ns0-non-traites.txt")
     with open(output_file, "w", encoding="utf-8") as f:
         for art in articles_not_trated:
             f.write(art + "\n")

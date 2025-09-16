@@ -1,4 +1,5 @@
 import re
+from config import SCRAPPING_OUTPUT
 
 ORDINALS = {
     1: "voalohany",
@@ -164,7 +165,7 @@ def clean_and_convert(text: str) -> str:
 # Exemple
 if __name__ == "__main__":
     # Ouvrir le fichier pour lire son contenu
-    chemin_fichier = r'D:\Scrapping\out-put\cleaning-baiboly-malagasy.txt'
+    chemin_fichier = f"{SCRAPPING_OUTPUT}\cleaning-baiboly-malagasy.txt"
     with open(chemin_fichier, 'r', encoding='utf-8') as f:
         texte = f.read()
 

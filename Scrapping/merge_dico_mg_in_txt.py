@@ -2,9 +2,11 @@ import csv
 import re
 import unicodedata
 from pathlib import Path
+from config import SCRAPPING_CSV, SCRAPPING_DOC
 
-INPUT_DIR = Path(r"D:\Scrapping\csv")
-OUTPUT_TXT = Path(r"D:\Scrapping\out-put\dict_merged_clean.txt")
+INPUT_DIR = Path(f"{SCRAPPING_CSV}")
+
+OUTPUT_TXT = Path(f"{SCRAPPING_DOC}\dict_merged_clean.txt")
 OUTPUT_TXT.parent.mkdir(parents=True, exist_ok=True)
 
 GRAMMAR_TAGS = [
