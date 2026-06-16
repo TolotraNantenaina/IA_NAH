@@ -37,14 +37,10 @@ class CausalSelfAttention(nn.Module):
         assert n_embd % n_head == 0
         self.n_head = n_head
         self.head_dim = n_embd // n_head
+        self.dropout = dropout
         self.qkv = nn.Linear(n_embd, 3 * n_embd, bias=False)
         self.proj = nn.Linear(n_embd, n_embd)
-        self.attn_drop = nn.Dropout(dropout)
         self.resid_drop = nn.Dropout(dropout)
-        self.register_buffer(
-            "mask",
-            torch.tril(torch.ones(block_size, block_size)).view(1, 1, block_size, block_size),
-        )
         self.rotary = RotaryEmbedding(self.head_dim)
 
     def forward(self, x):
@@ -56,11 +52,9 @@ class CausalSelfAttention(nn.Module):
         v = v.view(B, T, self.n_head, self.head_dim).transpose(1, 2)
         cos, sin = self.rotary(T, x.device, x.dtype)
         q, k = apply_rotary(q, k, cos[:, :, :T], sin[:, :, :T])
-        att = (q @ k.transpose(-2, -1)) * (self.head_dim ** -0.5)
-        att = att.masked_fill(self.mask[:, :, :T, :T] == 0, float("-inf"))
-        att = F.softmax(att, dim=-1)
-        att = self.attn_drop(att)
-        y = att @ v
+        # Flash Attention : masque causal et dropout gérés en interne, moins de mémoire
+        drop_p = self.dropout if self.training else 0.0
+        y = F.scaled_dot_product_attention(q, k, v, dropout_p=drop_p, is_causal=True)
         y = y.transpose(1, 2).contiguous().view(B, T, C)
         return self.resid_drop(self.proj(y))
 

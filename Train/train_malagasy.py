@@ -22,6 +22,33 @@ def get_device():
 
 
 def get_hyperparameters():
+    # NANO=1 : modèle réduit pour itérer vite sur M2 Air 8 Go
+    nano = os.environ.get("NANO", "0") == "1"
+    if nano:
+        print("Mode NANO activé : modèle réduit pour entraînement rapide")
+        return {
+            "batch_size": 16,
+            "block_size": 128,
+            "max_iters": 5000,
+            "eval_interval": 250,
+            "learning_rate": 3e-4,
+            "eta_min": 1e-5,
+            "warmup_iters": 100,
+            "weight_decay": 0.1,
+            "max_grad_norm": 1.0,
+            "eval_iters": 50,
+            "n_embd": 128,
+            "n_head": 4,
+            "n_layer": 4,
+            "dropout": 0.1,
+            "checkpoint_dir": None,
+            "checkpoint_interval": 500,
+            "resume_from_checkpoint": True,
+            "accumulation_steps": 2,
+            "use_bpe": True,
+            "bpe_vocab_size": 4000,
+            "bpe_model_prefix": os.path.join(TRAIN_DIR, "malagasy_bpe_nano"),
+        }
     return {
         "batch_size": 32,
         "block_size": 256,
@@ -32,7 +59,7 @@ def get_hyperparameters():
         "warmup_iters": 400,
         "weight_decay": 0.1,
         "max_grad_norm": 1.0,
-        "eval_iters": 200,
+        "eval_iters": 50,
         "n_embd": 256,
         "n_head": 8,
         "n_layer": 6,
@@ -125,8 +152,11 @@ def get_batch(split, train_data, val_data, batch_size, block_size, device):
 
 
 def amp_context(device, use_amp):
-    if use_amp and device.type in ("mps", "cuda"):
-        return torch.autocast(device_type=device.type, dtype=torch.float16)
+    if use_amp and device.type == "mps":
+        # bfloat16 plus stable que float16 sur Apple Silicon
+        return torch.autocast(device_type="mps", dtype=torch.bfloat16)
+    if use_amp and device.type == "cuda":
+        return torch.autocast(device_type="cuda", dtype=torch.float16)
     return nullcontext()
 
 
