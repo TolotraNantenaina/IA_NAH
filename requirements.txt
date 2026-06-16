@@ -1,8 +1,9 @@
 # Dépendances principales pour IA_NAH
 requests>=2.25.0
 beautifulsoup4>=4.9.0
-torch>=1.10.0
+torch>=2.0.0
 pandas>=1.1.0
+sentencepiece>=0.1.99
 
 # Optionnel pour l'utilisation de Jupyter ou l'exploration
 notebook
