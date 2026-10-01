@@ -1,9 +1,9 @@
 """
 Fine-tuning du modèle malagasy sur des discours conversationnels.
 
-Le corpus de fine-tuning est la concaténation de :
-  - Train/data/discours_malagasy.txt
-  - Train/data/discours_ex_malagasy.txt
+Le corpus de fine-tuning utilise le fichier fusionné :
+  - Train/data/discours_merged.txt  (généré par merge_discours.py)
+    contient : dialogue Rakoto/Rasoa + 49 kabary/proverbes JSON + 219 Q&A CSV
 
 Usage :
     python Train/finetune_discours.py
@@ -25,6 +25,8 @@ from model import BigramLanguageModel
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config import TRAIN_DATA, TRAIN_DIR, TRAIN_OUTPUT
 
+DISCOURS_MERGED = os.path.join(TRAIN_DATA, "discours_merged.txt")
+# Fallback sur les fichiers séparés si le fichier fusionné n'existe pas
 DISCOURS_FILES = [
     os.path.join(TRAIN_DATA, "discours_malagasy.txt"),
     os.path.join(TRAIN_DATA, "discours_ex_malagasy.txt"),
@@ -49,8 +51,10 @@ def get_device(device_arg="auto"):
 
 
 def amp_context(device, use_amp):
-    if use_amp and device.type in ("mps", "cuda"):
-        return torch.autocast(device_type=device.type, dtype=torch.float16)
+    if use_amp and device.type == "mps":
+        return torch.autocast(device_type="mps", dtype=torch.bfloat16)
+    if use_amp and device.type == "cuda":
+        return torch.autocast(device_type="cuda", dtype=torch.float16)
     return nullcontext()
 
 
@@ -59,7 +63,14 @@ def amp_context(device, use_amp):
 # ---------------------------------------------------------------------------
 
 def load_discourse_corpus():
-    """Charge et concatène tous les fichiers de discours."""
+    """Charge le corpus de discours fusionné, ou les fichiers séparés en fallback."""
+    if os.path.isfile(DISCOURS_MERGED):
+        with open(DISCOURS_MERGED, "r", encoding="utf-8") as f:
+            content = f.read().strip()
+        print(f"  discours_merged.txt : {len(content):,} caractères")
+        return content
+    # Fallback : ancienne méthode avec fichiers séparés
+    print("Avertissement : discours_merged.txt introuvable, utilisation des fichiers séparés.")
     parts = []
     for path in DISCOURS_FILES:
         if not os.path.isfile(path):
